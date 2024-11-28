@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/T4EgN44/UgkeEJ7HTG3m6eCo7cOGCh2AACXF8lS5gyTXi/IUdUDpNx4CK3b3BmdEk9MP1gKGRkGGYBuy9bPOA==",
+  "dgSpecHash": "wPsHIR4SxioY4bnRi7zxvaZDFdTo+rbzvjfjmrE4AOoYwp9isnPKgkjrbWzobdCUKBr4PdU3tyX6sGOp51HaIA==",
   "success": true,
-  "projectFilePath": "Q:\\Dev\\MultitenancyExample\\MultitenancyExample.csproj",
+  "projectFilePath": "Q:\\Dev\\GithubBlogExamples\\BlogExamples\\MultitenancyExample\\MultitenancyExample.csproj",
   "expectedPackageFiles": [
     "Q:\\andre\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "Q:\\andre\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
