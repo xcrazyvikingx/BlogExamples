@@ -4,15 +4,21 @@ using MultitenancyExample.Contexts;
 
 namespace MultitenancyExample.Helpers;
 
-public class CurrentUserDataAccessor(IHttpContextAccessor httpContextAccessor, MainContext mainContext)
+public interface ICurrentUserDataAccessor
 {
-    public async Task<CurrentUserData> GetCurrentUserData()
+    Task<CurrentUserData> GetCurrentUserDataAsync();
+}
+
+public class CurrentUserDataAccessor(IHttpContextAccessor httpContextAccessor, MainContext mainContext) : ICurrentUserDataAccessor
+{
+    public async Task<CurrentUserData> GetCurrentUserDataAsync()
     {
         // Get the User ID from the current user, adjust to your needs
         var userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var customerId = getSelectedCustomerId();
 
-        // Gets the customer. Throws an exception if none is found, or if more than one is found
+        // Gets the customer relation. 
+        // Throws an exception if none or more than one is found
         var customer = await mainContext.UserCustomers
             .Where(uc => uc.UserId == userId && (!customerId.HasValue || uc.CustomerId == customerId))
             .Select(uc => uc.Customer)
@@ -23,9 +29,10 @@ public class CurrentUserDataAccessor(IHttpContextAccessor httpContextAccessor, M
         {
             UserId = userId,
             CustomerId = customer.Id,
-            ServerName = customer.ServerName,
             DatabaseName = customer.DatabaseName,
-            DatabaseUsername = customer.DatabaseUsername
+            // Add the other properties you need to fit your use case
+            // ServerName = customer.ServerName,
+            // DatabaseUsername = customer.DatabaseUsername
         };
     }
 

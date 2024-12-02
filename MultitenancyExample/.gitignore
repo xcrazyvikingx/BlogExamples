@@ -1,0 +1,51 @@
+# Build artifacts
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.db
+
+# User-specific files
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ASP.NET
+*.vs
+_AppStart.*
+_ProjectItems.txt
+_ReSharper.Caches
+/GeneratedFiles/
+
+# Logs
+*.log
+logs/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Configuration
+appsettings.Development.json
+appsettings.*.json
+
+# Sensitive files (customize as needed)
+secrets.json
+
+# npm related files
+node_modules/
+
+# Database files (if generated or temporary)
+# Databases/*.db
+# *.sqlite
+
+# IDE specific files
+*.code-workspace
+
+# Rider
+.idea/
+.idea/*

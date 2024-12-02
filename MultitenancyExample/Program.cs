@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MultitenancyExample.Contexts;
+using MultitenancyExample.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,10 @@ builder.Services.AddDbContext<MainContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MainContext"));
 });
 
+builder.Services.AddScoped<ICurrentUserDataAccessor, CurrentUserDataAccessor>();
+builder.Services.AddScoped<ISharedContextAccessor, SharedContextAccessor>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -23,7 +28,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-
 
 app.Run();
