@@ -31,8 +31,8 @@ public class CurrentUserDataAccessor(IHttpContextAccessor httpContextAccessor, M
             CustomerId = customer.Id,
             DatabaseName = customer.DatabaseName,
             // Add the other properties you need to fit your use case
-            // ServerName = customer.ServerName,
-            // DatabaseUsername = customer.DatabaseUsername
+             ServerName = customer.ServerName,
+             DatabaseUsername = customer.DatabaseUsername
         };
     }
 

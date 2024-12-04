@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Sqlite;
 using MultitenancyExample.Contexts;
 using MultitenancyExample.Helpers;
 
@@ -12,8 +13,13 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<MainContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MainContext"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("MainContext"));
 });
+
+// Setting a default connection string for the shared context, so we can use migrations
+// Should have been a template database, but I'm lazy   
+builder.Services.AddDbContext<SharedContext>(options =>
+    options.UseSqlite("Data Source=Databases/TemplateShared.db;"));
 
 builder.Services.AddScoped<ICurrentUserDataAccessor, CurrentUserDataAccessor>();
 builder.Services.AddScoped<ISharedContextAccessor, SharedContextAccessor>();
