@@ -11,15 +11,12 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<MainContext>(options =>
-{
-    options.UseSqlite(builder.Configuration.GetConnectionString("MainContext"));
-});
+builder.Services.AddDbContext<MainContext>(options => 
+    options.UseSqlite(builder.Configuration.GetConnectionString("MainContext")));
 
 // Setting a default connection string for the shared context, so we can use migrations
-// Should have been a template database, but I'm lazy   
 builder.Services.AddDbContext<SharedContext>(options =>
-    options.UseSqlite("Data Source=Databases/TemplateShared.db;"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("SharedContext")));
 
 builder.Services.AddScoped<ICurrentUserDataAccessor, CurrentUserDataAccessor>();
 builder.Services.AddScoped<ISharedContextAccessor, SharedContextAccessor>();
