@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MultitenancyExample.EntityModels.Shared;
@@ -6,6 +7,9 @@ using MultitenancyExample.ViewModels;
 
 namespace MultitenancyExample.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
 public class DocumentsController : ControllerBase
 {
     private readonly ISharedContextAccessor _sharedContextAccessor;
