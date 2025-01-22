@@ -12,3 +12,6 @@ dotnet ef database update --context SharedContext
 dotnet ef database update --context SharedContext --connection "Data Source=Databases/CustomerA.db;"
 dotnet ef database update --context SharedContext --connection "Data Source=Databases/CustomerB.db;"
 
+# view example page
+dotnet run -> navigate to endpoint -> https://localhost:xxxx/index.html
+
