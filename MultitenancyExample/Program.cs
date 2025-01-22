@@ -13,13 +13,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = false,
+            ValidateIssuerSigningKey = false,
             ValidIssuer = "your-issuer",
             ValidAudience = "your-audience",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your-secure-key"))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your-secure-key-that-is-long-enough-to-be-secure-and-should-be-stored-in-a-secure-place-and-random-enough-to-be-secure-and-should-be-kept-secret"))
         };
     });
 builder.Services.AddAuthorization();
@@ -42,7 +42,11 @@ builder.Services.AddScoped<ICurrentUserDataAccessor, CurrentUserDataAccessor>();
 builder.Services.AddScoped<ISharedContextAccessor, SharedContextAccessor>();
 
 
+
 var app = builder.Build();
+
+// Seed the databases
+await app.Services.SeedDatabaseAsync();
 
 app.UseAuthentication();
 app.UseAuthorization();
