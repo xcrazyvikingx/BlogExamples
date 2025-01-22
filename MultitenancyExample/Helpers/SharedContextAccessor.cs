@@ -27,19 +27,19 @@ public class SharedContextAccessor : ISharedContextAccessor
             {
                 throw new Exception("CustomerContext can't be created. No customer selected/ or user has no access to any customer");
             }
-            
+
             if (string.IsNullOrEmpty(currentUserData.DatabaseName))
             {
                 throw new Exception("CustomerContext can't be created. Missing database information");
             }
-            
+
             var connectionstring = ConnectionStringHelper.GetConnectionString(
                 currentUserData.DatabaseName
                 );
 
             var optionsBuilder = new DbContextOptionsBuilder<SharedContext>();
             // This is the important part, it tells your code which database to use
-            optionsBuilder.UseSqlServer(connectionstring, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+            optionsBuilder.UseSqlite(connectionstring, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
             return new SharedContext(optionsBuilder.Options);
         });
     }
