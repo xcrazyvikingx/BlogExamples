@@ -1,9 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using MultitenancyExample.Contexts;
+using MultitenancyExample.Helpers;
 
 namespace MultitenancyExample.Controllers;
 
@@ -12,11 +14,14 @@ namespace MultitenancyExample.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly MainContext _mainContext;
+    private readonly CurrentUserDataAccessor _currentUserDataAccessor;
     public AuthController(
-        MainContext mainContext
+        MainContext mainContext,
+        CurrentUserDataAccessor currentUserDataAccessor
     )
     {
         _mainContext = mainContext;
+        _currentUserDataAccessor = currentUserDataAccessor;
     }
 
 
@@ -43,12 +48,37 @@ public class AuthController : ControllerBase
         var tokenString = tokenHandler.WriteToken(token);
 
         return Ok(new { token = tokenString });
+    }
 
+    [HttpGet("customer-logins")]
+    public async Task<IActionResult> GetCustomerLogins()
+    {
+        var currentUserData = await _currentUserDataAccessor.GetCurrentUserDataAsync();
+        if (currentUserData == null)
+        {
+            return Unauthorized();
+        }
+        var userId = currentUserData.UserId;
 
+        var customerLogins = _mainContext.UserCustomers
+            .Where(ucl => ucl.UserId == userId)
+            .Select(ucl => new UserCustomerLogin
+            {
+                CustomerId = ucl.CustomerId,
+                CustomerName = ucl.Customer.Name
+            }).ToList();
+
+        return Ok(customerLogins);
     }
 }
 
 public class LoginRequest
 {
     public string Username { get; set; }
+}
+
+public class UserCustomerLogin
+{
+    public string CustomerName { get; set; }
+    public int CustomerId { get; set; }
 }
