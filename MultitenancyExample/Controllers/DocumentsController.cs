@@ -24,7 +24,13 @@ public class DocumentsController : ControllerBase
     {
         var sharedContext = await _sharedContextAccessor.GetSharedContextAsync();
         var documents = await sharedContext.Documents.ToListAsync();
-        return Ok(documents);
+        var documentGetViewModels = documents.Select(d => new DocumentGetViewModel
+        {
+            Id = d.Id,
+            Name = d.Title,
+            Content = d.Content
+        });
+        return Ok(documentGetViewModels);
     }
 
     [HttpPost]
