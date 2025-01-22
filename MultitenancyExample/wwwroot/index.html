@@ -2,8 +2,8 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>API Frontend</title>
 </head>
 
@@ -17,106 +17,174 @@
         <input type="text" id="username" required />
         <button type="submit">Login</button>
     </form>
-
     <div id="loginMessage"></div>
 
-    <!-- Token Display -->
-    <div id="tokenSection" style="display:none;">
-        <h2>Token</h2>
-        <pre id="tokenDisplay"></pre>
+    <!-- Hidden token field (not shown to the user) -->
+    <input type="hidden" id="authToken" />
 
-        <!-- Fetch Documents Button -->
+    <!-- Customer Selection Section (shown after login) -->
+    <div id="customerSelectionSection" style="display: none;">
+        <h2>Select Customer</h2>
+        <div id="customerList"></div>
+    </div>
+
+    <!-- Documents Section (shown after customer is selected) -->
+    <div id="documentsSection" style="display: none;">
+        <h2>Documents</h2>
         <button id="fetchDocuments">Fetch Documents</button>
-
-        <!-- Documents List -->
-        <div id="documentsSection" style="display:none;">
-            <h2>Documents</h2>
-            <ul id="documentsList"></ul>
-        </div>
+        <ul id="documentsList"></ul>
     </div>
 
     <script>
-        // Login form handler
-        const loginForm = document.getElementById('loginForm');
-        const loginMessage = document.getElementById('loginMessage');
-        const tokenSection = document.getElementById('tokenSection');
-        const tokenDisplay = document.getElementById('tokenDisplay');
-        const fetchDocumentsButton = document.getElementById('fetchDocuments');
-        const documentsSection = document.getElementById('documentsSection');
-        const documentsList = document.getElementById('documentsList');
+        // ======== DOM ELEMENTS ========
+        const loginForm = document.getElementById("loginForm");
+        const loginMessage = document.getElementById("loginMessage");
+        const authTokenField = document.getElementById("authToken"); // hidden field
+        const customerSelectionSection = document.getElementById("customerSelectionSection");
+        const customerListDiv = document.getElementById("customerList");
+        const documentsSection = document.getElementById("documentsSection");
+        const fetchDocumentsButton = document.getElementById("fetchDocuments");
+        const documentsList = document.getElementById("documentsList");
 
-        // API base URL (adjust as needed)
-        const apiBaseUrl = 'https://localhost:7254/api';
+        // ======== CONFIG ========
+        // Adjust as needed for your backend
+        const apiBaseUrl = "https://localhost:7254/api";
 
-        // Handle login form submission
-        loginForm.addEventListener('submit', async (event) => {
+        // ======== EVENT HANDLERS ========
+
+        // 1. Handle login
+        loginForm.addEventListener("submit", async (event) => {
             event.preventDefault();
-
-            const username = document.getElementById('username').value;
+            const username = document.getElementById("username").value;
 
             try {
                 const response = await fetch(`${apiBaseUrl}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username })
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username }),
                 });
 
                 if (!response.ok) {
-                    throw new Error('Login failed: ' + response.statusText);
+                    throw new Error("Login failed: " + response.statusText);
                 }
 
                 const data = await response.json();
                 const token = data.token;
 
-                // Store token in localStorage
-                localStorage.setItem('authToken', token);
+                // Store token in hidden field & localStorage
+                authTokenField.value = token;
+                localStorage.setItem("authToken", token);
 
-                // Display token
-                tokenDisplay.textContent = token;
-                tokenSection.style.display = 'block';
-                loginMessage.textContent = 'Login successful!';
-                loginMessage.style.color = 'green';
+                // Show success message
+                loginMessage.textContent = "Login successful!";
+                loginMessage.style.color = "green";
+
+                // After login, fetch available customers:
+                await fetchAvailableCustomers(token);
+
             } catch (error) {
                 loginMessage.textContent = error.message;
-                loginMessage.style.color = 'red';
+                loginMessage.style.color = "red";
             }
         });
 
-        // Handle fetching documents
-        fetchDocumentsButton.addEventListener('click', async () => {
+        // 2. Handle fetching documents
+        fetchDocumentsButton.addEventListener("click", async () => {
             try {
-                const token = localStorage.getItem('authToken');
+                const token = localStorage.getItem("authToken");
                 if (!token) {
-                    throw new Error('No token available. Please log in.');
+                    throw new Error("No token available. Please log in.");
                 }
 
+                // Grab the selected customerId (which we saved in a hidden input or a radio button value).
+                // For example, if we used radio buttons with name="selectedCustomer", find the checked one:
+                const selectedRadio = document.querySelector('input[name="selectedCustomer"]:checked');
+                if (!selectedRadio) {
+                    throw new Error("Please select a customer first.");
+                }
+                const selectedCustomerId = selectedRadio.value;
+
                 const response = await fetch(`${apiBaseUrl}/documents`, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "selected-customer-id": selectedCustomerId,
+                    },
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch documents: ' + response.statusText);
+                    throw new Error("Failed to fetch documents: " + response.statusText);
                 }
 
                 const documents = await response.json();
-
                 // Clear previous list
-                documentsList.innerHTML = '';
+                documentsList.innerHTML = "";
 
                 // Populate list with documents
-                documents.forEach(doc => {
-                    const listItem = document.createElement('li');
+                documents.forEach((doc) => {
+                    const listItem = document.createElement("li");
                     listItem.textContent = `ID: ${doc.id}, Name: ${doc.name}, Content: ${doc.content}`;
                     documentsList.appendChild(listItem);
                 });
 
-                documentsSection.style.display = 'block';
+                documentsSection.style.display = "block";
             } catch (error) {
                 loginMessage.textContent = error.message;
-                loginMessage.style.color = 'red';
+                loginMessage.style.color = "red";
             }
         });
+
+        // ======== HELPER FUNCTIONS ========
+
+        // Fetch the customers for the logged-in user
+        async function fetchAvailableCustomers(token) {
+            try {
+                const response = await fetch(`${apiBaseUrl}/auth/customer-logins`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch customer logins: " + response.statusText);
+                }
+
+                const customers = await response.json();
+                displayCustomerOptions(customers);
+
+            } catch (error) {
+                loginMessage.textContent = error.message;
+                loginMessage.style.color = "red";
+            }
+        }
+
+        // Render customer options as radio buttons
+        function displayCustomerOptions(customers) {
+            // Clear any existing content
+            customerListDiv.innerHTML = "";
+
+            customers.forEach((cust) => {
+                // Create a radio button
+                const label = document.createElement("label");
+                const radio = document.createElement("input");
+                radio.type = "radio";
+                radio.name = "selectedCustomer";
+                radio.value = cust.customerId;
+
+                label.appendChild(radio);
+                label.appendChild(document.createTextNode(` ${cust.customerName} (ID: ${cust.customerId})`));
+
+                // Put each radio button in its own line
+                const br = document.createElement("br");
+                customerListDiv.appendChild(label);
+                customerListDiv.appendChild(br);
+            });
+
+            // Make the customer selection section visible
+            customerSelectionSection.style.display = "block";
+        }
     </script>
 </body>
 
