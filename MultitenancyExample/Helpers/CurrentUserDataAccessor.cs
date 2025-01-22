@@ -15,6 +15,7 @@ public class CurrentUserDataAccessor(IHttpContextAccessor httpContextAccessor, M
     {
         // Get the User ID from the current user, adjust to your needs
         var userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         var customerId = getSelectedCustomerId();
 
         // Gets the customer relation. 
@@ -31,8 +32,8 @@ public class CurrentUserDataAccessor(IHttpContextAccessor httpContextAccessor, M
             CustomerId = customer.Id,
             DatabaseName = customer.DatabaseName,
             // Add the other properties you need to fit your use case
-             ServerName = customer.ServerName,
-             DatabaseUsername = customer.DatabaseUsername
+            ServerName = customer.ServerName,
+            DatabaseUsername = customer.DatabaseUsername
         };
     }
 
