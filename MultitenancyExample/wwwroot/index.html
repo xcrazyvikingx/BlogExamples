@@ -1,43 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Frontend</title>
 </head>
-<body>
-    <h1>API Interaction</h1>
-    <form id="apiForm">
-        <label for="endpoint">API Endpoint:</label>
-        <input type="text" id="endpoint" placeholder="/api/documents" required />
-        <button type="submit">Call API</button>
-    </form>
-    <pre id="response"></pre>
-    <script>
-        const form = document.getElementById('apiForm');
-        const responseOutput = document.getElementById('response');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const endpoint = document.getElementById('endpoint').value;
+<body>
+    <h1>API Frontend with Authentication</h1>
+
+    <!-- Login Form -->
+    <form id="loginForm">
+        <h2>Login</h2>
+        <label for="username">Username:</label>
+        <input type="text" id="username" required />
+        <button type="submit">Login</button>
+    </form>
+
+    <div id="loginMessage"></div>
+
+    <!-- Token Display -->
+    <div id="tokenSection" style="display:none;">
+        <h2>Token</h2>
+        <pre id="tokenDisplay"></pre>
+
+        <!-- Fetch Documents Button -->
+        <button id="fetchDocuments">Fetch Documents</button>
+
+        <!-- Documents List -->
+        <div id="documentsSection" style="display:none;">
+            <h2>Documents</h2>
+            <ul id="documentsList"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Login form handler
+        const loginForm = document.getElementById('loginForm');
+        const loginMessage = document.getElementById('loginMessage');
+        const tokenSection = document.getElementById('tokenSection');
+        const tokenDisplay = document.getElementById('tokenDisplay');
+        const fetchDocumentsButton = document.getElementById('fetchDocuments');
+        const documentsSection = document.getElementById('documentsSection');
+        const documentsList = document.getElementById('documentsList');
+
+        // API base URL (adjust as needed)
+        const apiBaseUrl = 'https://localhost:7254/api';
+
+        // Handle login form submission
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
 
             try {
-                const response = await fetch(endpoint, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                    }
+                const response = await fetch(`${apiBaseUrl}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username })
                 });
 
                 if (!response.ok) {
-                    throw new Error('API call failed: ' + response.status);
+                    throw new Error('Login failed: ' + response.statusText);
                 }
 
                 const data = await response.json();
-                responseOutput.textContent = JSON.stringify(data, null, 2);
+                const token = data.token;
+
+                // Store token in localStorage
+                localStorage.setItem('authToken', token);
+
+                // Display token
+                tokenDisplay.textContent = token;
+                tokenSection.style.display = 'block';
+                loginMessage.textContent = 'Login successful!';
+                loginMessage.style.color = 'green';
             } catch (error) {
-                responseOutput.textContent = 'Error: ' + error.message;
+                loginMessage.textContent = error.message;
+                loginMessage.style.color = 'red';
+            }
+        });
+
+        // Handle fetching documents
+        fetchDocumentsButton.addEventListener('click', async () => {
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    throw new Error('No token available. Please log in.');
+                }
+
+                const response = await fetch(`${apiBaseUrl}/documents`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch documents: ' + response.statusText);
+                }
+
+                const documents = await response.json();
+
+                // Clear previous list
+                documentsList.innerHTML = '';
+
+                // Populate list with documents
+                documents.forEach(doc => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `ID: ${doc.id}, Name: ${doc.name}, Content: ${doc.content}`;
+                    documentsList.appendChild(listItem);
+                });
+
+                documentsSection.style.display = 'block';
+            } catch (error) {
+                loginMessage.textContent = error.message;
+                loginMessage.style.color = 'red';
             }
         });
     </script>
 </body>
+
 </html>
