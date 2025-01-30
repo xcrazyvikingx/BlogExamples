@@ -10,6 +10,9 @@
 <body>
     <h1>API Frontend with Authentication</h1>
 
+    <p>Available users: admin, userA, userB. <br />Admin has access to CustomerA and CustomerB.<br />UserA only
+        CustomerA, UserB only CustomerB</p>
+
     <!-- Login Form -->
     <form id="loginForm">
         <h2>Login</h2>
@@ -164,7 +167,7 @@
         function displayCustomerOptions(customers) {
             // Clear any existing content
             customerListDiv.innerHTML = "";
-
+            let selectedCustomer = false;
             customers.forEach((cust) => {
                 // Create a radio button
                 const label = document.createElement("label");
@@ -172,6 +175,10 @@
                 radio.type = "radio";
                 radio.name = "selectedCustomer";
                 radio.value = cust.customerId;
+                if (!selectedCustomer) {
+                    radio.checked = true;
+                    selectedCustomer = true;
+                }
 
                 label.appendChild(radio);
                 label.appendChild(document.createTextNode(` ${cust.customerName} (ID: ${cust.customerId})`));
@@ -184,6 +191,7 @@
 
             // Make the customer selection section visible
             customerSelectionSection.style.display = "block";
+            documentsSection.style.display = "block";
         }
     </script>
 </body>
