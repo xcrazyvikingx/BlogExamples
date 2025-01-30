@@ -20,6 +20,7 @@ public class CurrentUserDataAccessor(IHttpContextAccessor httpContextAccessor, M
 
         // Gets the customer relation. 
         // Throws an exception if none or more than one is found
+        // If customerId is NULL, but user can only access one Customer we can still resolve the current customer. 
         var customer = await mainContext.UserCustomers
             .Where(uc => uc.UserId == userId && (!customerId.HasValue || uc.CustomerId == customerId))
             .Select(uc => uc.Customer)
